@@ -39,7 +39,7 @@ class TodoController {
       const { id } = req.params
       const { sDesc, dDate } = req.body
 
-      const todo = await TodoModel.findOne({ _id: id }).lean()
+      const todo = await TodoModel.findOne({ _id: id, iUser: new mongoose.Types.ObjectId(req.userId) }).lean()
 
       if (!todo) return res.status(statusCode.NotFound).json({ message: messages.notFound.replace('##', 'todo') })
 
@@ -56,15 +56,39 @@ class TodoController {
     }
   }
 
-  async delete (req:CustomRequest, res:Response) {
+  async markComplete (req:CustomRequest, res:Response) {
     try {
       console.log('called', req.userId)
       const errors = validationResult(req)
       if (!errors.isEmpty()) return res.status(statusCode.UnprocessableEntity).json({ status: statusCode.UnprocessableEntity, errors: errors.array() })
 
       const { id } = req.params
+      const { bCompleted } = req.body
 
-      const todo = await TodoModel.findOne({ _id: id }).lean()
+      const todo = await TodoModel.findOne({ _id: id, iUser: new mongoose.Types.ObjectId(req.userId) }).lean()
+
+      if (!todo) return res.status(statusCode.NotFound).json({ message: messages.notFound.replace('##', 'todo') })
+
+      const updateObj = { bCompleted }
+
+      const updatedTodo = await TodoModel.findByIdAndUpdate(id, updateObj, { new: true })
+
+      return res.status(statusCode.OK).json({ message: messages.editedSuccessfully.replace('##', 'todo'), data: updatedTodo })
+    } catch (error) {
+      return res.status(statusCode.InternalServerError).json({
+        status: statusCode.InternalServerError,
+        message: messages.InternalServerError
+      })
+    }
+  }
+
+  async delete (req:CustomRequest, res:Response) {
+    try {
+      console.log('called', req.userId)
+
+      const { id } = req.params
+
+      const todo = await TodoModel.findOne({ _id: id, iUser: new mongoose.Types.ObjectId(req.userId) }).lean()
 
       if (!todo) return res.status(statusCode.NotFound).json({ message: messages.notFound.replace('##', 'todo') })
 
@@ -82,12 +106,10 @@ class TodoController {
   async details (req:CustomRequest, res:Response) {
     try {
       console.log('called', req.userId)
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) return res.status(statusCode.UnprocessableEntity).json({ status: statusCode.UnprocessableEntity, errors: errors.array() })
 
       const { id } = req.params
 
-      const todo = await TodoModel.findOne({ _id: id }).lean()
+      const todo = await TodoModel.findOne({ _id: id, iUser: new mongoose.Types.ObjectId(req.userId) }).lean()
 
       if (!todo) return res.status(statusCode.NotFound).json({ message: messages.notFound.replace('##', 'todo') })
 
@@ -103,8 +125,6 @@ class TodoController {
   async list (req:CustomRequest, res:Response) {
     try {
       console.log('called', req.userId)
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) return res.status(statusCode.UnprocessableEntity).json({ status: statusCode.UnprocessableEntity, errors: errors.array() })
 
       const { limit, skip } = defaultPagination(req.query)
 

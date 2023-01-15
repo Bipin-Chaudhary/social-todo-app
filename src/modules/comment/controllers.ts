@@ -60,8 +60,6 @@ class PostController {
   async delete (req:CustomRequest, res:Response) {
     try {
       console.log('called', req.userId)
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) return res.status(statusCode.UnprocessableEntity).json({ status: statusCode.UnprocessableEntity, errors: errors.array() })
 
       const { id } = req.params // comment id
 

@@ -1,8 +1,8 @@
 export default (obj) => {
-  let { limit = 10, page = 1, search = '' } = obj || {}
+  let { limit = 10, skip = 0, search = '' } = obj || {}
 
   limit = parseInt(limit)
-  page = parseInt(page)
+  skip = parseInt(skip)
 
   search = search.replace(/\\/g, '\\\\')
     .replace(/\$/g, '\\$')
@@ -18,8 +18,7 @@ export default (obj) => {
   let regSearch:any = ''
   if (search) regSearch = { $regex: new RegExp('^.*' + search + '.*', 'i') }
 
-  if (!limit || limit === 'undefined' || limit === 1) limit = 10
-  const skip = page > 0 ? ((page - 1) * limit) : 0
+  if (!limit) limit = 10
 
-  return { limit, skip, page, search: regSearch }
+  return { limit, skip, search: regSearch }
 }

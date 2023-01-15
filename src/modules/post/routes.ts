@@ -22,6 +22,6 @@ router.get('/:id', authCheck, PostController.details)
 router.get('/user/list', authCheck, PostController.list)
 
 // public apis
-router.get('/user/list/public/:id', authCheck, PostController.listPublicPosts)
+router.get('/user/list/public/:id', PostController.listPublicPosts)
 
 export default router

@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { body } from 'express-validator'
 import UsersController from './controllers'
+import authCheck from '../../middleware/authCheck'
 
 const router = Router()
 
@@ -16,11 +17,16 @@ router.post('/login', [
   body('sPassword').not().isEmpty()
 ], UsersController.login)
 
-router.put('/edit-profile/:_id', [
+router.put('/edit-profile', authCheck, [
   body('sName').not().isEmpty(),
   body('sMobile').not().isEmpty()
 ], UsersController.editProfileDetails)
 
-router.get('/profile-details/:_id', UsersController.editProfileDetails)
+router.get('/profile', authCheck, UsersController.getProfileDetails)
+
+// public Apis
+router.get('/public/profile/:id', UsersController.getPublicProfileDetails)
+
+router.get('/public/users', UsersController.listPublicUsers)
 
 export default router

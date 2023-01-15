@@ -16,6 +16,6 @@ router.put('/:id', authCheck, [
 router.delete('/:id', authCheck, CommentController.delete)
 
 // public apis
-router.get('/post/list/:id', authCheck, CommentController.listPublicPostComments)
+router.get('/post/list/:id', CommentController.listPublicPostComments)
 
 export default router
