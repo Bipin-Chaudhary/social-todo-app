@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import mongoose from 'mongoose'
-import TodoModel from './model'
+import PostModel from './model'
 import statusCode from '../../utils/statusCode'
 import messages from '../../utils/responseMessages'
 import { validationResult } from 'express-validator'
@@ -8,20 +8,20 @@ import defaultPagination from '../../utils/defaultPagination'
 
 type CustomRequest = Request & { userId?: string }
 
-class TodoController {
+class PostController {
   async add (req:CustomRequest, res:Response) {
     try {
       console.log('called', req.userId)
       const errors = validationResult(req)
       if (!errors.isEmpty()) return res.status(statusCode.UnprocessableEntity).json({ status: statusCode.UnprocessableEntity, errors: errors.array() })
 
-      const { sDesc, dDate } = req.body
+      const { sContent, sTitle } = req.body
 
-      const createObj = { iUser: req.userId, sDesc, dDate }
+      const createObj = { iUser: req.userId, sContent, sTitle }
 
-      const todo = await TodoModel.create(createObj)
+      const post = await PostModel.create(createObj)
 
-      return res.status(statusCode.OK).json({ message: messages.addedSuccessfully.replace('##', 'todo'), data: todo })
+      return res.status(statusCode.OK).json({ message: messages.addedSuccessfully.replace('##', 'post'), data: post })
     } catch (error) {
       return res.status(statusCode.InternalServerError).json({
         status: statusCode.InternalServerError,
@@ -37,17 +37,17 @@ class TodoController {
       if (!errors.isEmpty()) return res.status(statusCode.UnprocessableEntity).json({ status: statusCode.UnprocessableEntity, errors: errors.array() })
 
       const { id } = req.params
-      const { sDesc, dDate } = req.body
+      const { sContent, sTitle } = req.body
 
-      const todo = await TodoModel.findOne({ _id: id }).lean()
+      const updateObj = { iUser: req.userId, sContent, sTitle }
 
-      if (!todo) return res.status(statusCode.NotFound).json({ message: messages.notFound.replace('##', 'todo') })
+      const post = await PostModel.findOne({ _id: id, iUser: new mongoose.Types.ObjectId(req.userId) })
 
-      const updateObj = { sDesc, dDate }
+      if (!post) return res.status(statusCode.NotFound).json({ message: messages.notFound.replace('##', 'post') })
 
-      const updatedTodo = await TodoModel.findByIdAndUpdate(id, updateObj, { new: true })
+      const updatedPost = await PostModel.findByIdAndUpdate(id, updateObj, { new: true })
 
-      return res.status(statusCode.OK).json({ message: messages.editedSuccessfully.replace('##', 'todo'), data: updatedTodo })
+      return res.status(statusCode.OK).json({ message: messages.editedSuccessfully.replace('##', 'post'), data: updatedPost })
     } catch (error) {
       return res.status(statusCode.InternalServerError).json({
         status: statusCode.InternalServerError,
@@ -64,13 +64,13 @@ class TodoController {
 
       const { id } = req.params
 
-      const todo = await TodoModel.findOne({ _id: id }).lean()
+      const post = await PostModel.findOne({ _id: id, iUser: new mongoose.Types.ObjectId(req.userId) })
 
-      if (!todo) return res.status(statusCode.NotFound).json({ message: messages.notFound.replace('##', 'todo') })
+      if (!post) return res.status(statusCode.NotFound).json({ message: messages.notFound.replace('##', 'post') })
 
-      await TodoModel.deleteOne({ _id: id })
+      await PostModel.deleteOne({ _id: id })
 
-      return res.status(statusCode.OK).json({ message: messages.deletedSuccessfully.replace('##', 'todo'), data: null })
+      return res.status(statusCode.OK).json({ message: messages.deletedSuccessfully.replace('##', 'post'), data: null })
     } catch (error) {
       return res.status(statusCode.InternalServerError).json({
         status: statusCode.InternalServerError,
@@ -82,16 +82,14 @@ class TodoController {
   async details (req:CustomRequest, res:Response) {
     try {
       console.log('called', req.userId)
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) return res.status(statusCode.UnprocessableEntity).json({ status: statusCode.UnprocessableEntity, errors: errors.array() })
 
       const { id } = req.params
 
-      const todo = await TodoModel.findOne({ _id: id }).lean()
+      const post = await PostModel.findOne({ _id: id, iUser: new mongoose.Types.ObjectId(req.userId) })
 
-      if (!todo) return res.status(statusCode.NotFound).json({ message: messages.notFound.replace('##', 'todo') })
+      if (!post) return res.status(statusCode.NotFound).json({ message: messages.notFound.replace('##', 'post') })
 
-      return res.status(statusCode.OK).json({ message: messages.fetchedSuccessfully.replace('##', 'todo'), data: todo })
+      return res.status(statusCode.OK).json({ message: messages.fetchedSuccessfully.replace('##', 'post'), data: post })
     } catch (error) {
       return res.status(statusCode.InternalServerError).json({
         status: statusCode.InternalServerError,
@@ -103,21 +101,19 @@ class TodoController {
   async list (req:CustomRequest, res:Response) {
     try {
       console.log('called', req.userId)
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) return res.status(statusCode.UnprocessableEntity).json({ status: statusCode.UnprocessableEntity, errors: errors.array() })
 
       const { limit, skip } = defaultPagination(req.query)
 
       const query = { iUser: new mongoose.Types.ObjectId(req.userId) }
 
-      const todos = await TodoModel.find(query)
+      const post = await PostModel.find(query)
         .skip(skip)
         .limit(limit)
         .lean()
 
-      const total = await TodoModel.countDocuments(query)
+      const total = await PostModel.countDocuments(query)
 
-      return res.status(statusCode.OK).json({ message: messages.fetchedSuccessfully.replace('##', 'todo'), data: { docs: todos, total } })
+      return res.status(statusCode.OK).json({ message: messages.fetchedSuccessfully.replace('##', 'post'), data: { docs: post, total } })
     } catch (error) {
       return res.status(statusCode.InternalServerError).json({
         status: statusCode.InternalServerError,
@@ -126,7 +122,7 @@ class TodoController {
     }
   }
 
-  async listPublicTodos (req:CustomRequest, res:Response) {
+  async listPublicPosts (req:CustomRequest, res:Response) {
     try {
       console.log('called', req.userId)
 
@@ -136,14 +132,14 @@ class TodoController {
 
       const query = { iUser: new mongoose.Types.ObjectId(id) }
 
-      const todos = await TodoModel.find(query)
+      const posts = await PostModel.find(query)
         .skip(skip)
         .limit(limit)
         .lean()
 
-      const total = await TodoModel.countDocuments(query)
+      const total = await PostModel.countDocuments(query)
 
-      return res.status(statusCode.OK).json({ message: messages.fetchedSuccessfully.replace('##', 'todo'), data: { docs: todos, total } })
+      return res.status(statusCode.OK).json({ message: messages.fetchedSuccessfully.replace('##', 'post'), data: { docs: posts, total } })
     } catch (error) {
       return res.status(statusCode.InternalServerError).json({
         status: statusCode.InternalServerError,
@@ -153,4 +149,4 @@ class TodoController {
   }
 }
 
-export default new TodoController()
+export default new PostController()
