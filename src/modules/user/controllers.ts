@@ -7,7 +7,7 @@ import { validationResult } from 'express-validator'
 import jwt from 'jsonwebtoken'
 
 class UsersController {
-  signup = async (req:Request, res:Response) => {
+  async signup (req:Request, res:Response) {
     try {
       console.log('called', req.body)
       const errors = validationResult(req)
@@ -32,7 +32,7 @@ class UsersController {
     }
   }
 
-  login = async (req:Request, res:Response) => {
+  async login (req:Request, res:Response) {
     try {
       console.log('called', req.body)
       const errors = validationResult(req)
@@ -79,7 +79,7 @@ class UsersController {
     }
   }
 
-  editProfileDetails = async (req:Request, res:Response) => {
+  async editProfileDetails (req:Request, res:Response) {
     try {
       const errors = validationResult(req)
       if (!errors.isEmpty()) return res.status(statusCode.UnprocessableEntity).json({ status: statusCode.UnprocessableEntity, errors: errors.array() })
@@ -101,7 +101,7 @@ class UsersController {
     }
   }
 
-  getProfileDetails = async (req:Request, res:Response) => {
+  async getProfileDetails (req:Request, res:Response) {
     try {
       const { _id } = req.params
 
