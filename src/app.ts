@@ -10,6 +10,7 @@ import statusCode from './utils/statusCode'
 import UserRoutes from './modules/user/routes'
 import TodoRoutes from './modules/todo/routes'
 import PostRoutes from './modules/post/routes'
+import CommentRoutes from './modules/comment/routes'
 
 dotenv.config()
 
@@ -29,6 +30,7 @@ app.get('/', (req:Request, res:Response, next:NextFunction) => {
 app.use('/api/user', UserRoutes)
 app.use('/api/todo', TodoRoutes)
 app.use('/api/post', PostRoutes)
+app.use('/api/comment', CommentRoutes)
 
 // default route
 app.all('*', (req, res, next) => {
