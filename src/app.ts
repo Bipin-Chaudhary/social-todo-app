@@ -1,11 +1,15 @@
 import express, { Application, Request, Response, NextFunction } from 'express'
 import dotenv from 'dotenv'
 import cors from 'cors'
-import bodyParser = require('body-parser')
+import bodyParser from 'body-parser'
+import MongoConnect from './config/mongodb'
 
 dotenv.config()
 
 const app:Application = express()
+
+// mongodb connect
+MongoConnect.connect()
 
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }))
