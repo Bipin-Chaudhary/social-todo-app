@@ -5,6 +5,7 @@ import bodyParser from 'body-parser'
 import MongoConnect from './config/mongodb'
 import responseMessages from './utils/responseMessages'
 import statusCode from './utils/statusCode'
+import { auth, requiresAuth, claimCheck } from 'express-openid-connect'
 
 // routes
 import UserRoutes from './modules/user/routes'
@@ -22,7 +23,29 @@ app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
-app.get('/', (req:Request, res:Response, next:NextFunction) => {
+// auth0 authentication
+const config = {
+  authRequired: false,
+  auth0Logout: true,
+  secret: process.env.SECRET,
+  baseURL: process.env.BASE_URL,
+  clientID: process.env.CLIENT_ID,
+  issuerBaseURL: process.env.ISSUER_BASE_URL
+}
+
+// auth router attaches /login, /logout, and /callback routes to the baseURL
+app.use(auth(config))
+
+app.get('/', (req, res) => {
+  res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out')
+})
+
+// app.get('/admin/community', claimCheck((req, claims) => {
+//   if (claims) return claims.isAdmin && claims.roles.includes('community')
+// }), (req, res) => {
+// })
+
+app.get('/test', requiresAuth(), (req:Request, res:Response, next:NextFunction) => {
   res.send('welcome to social todo app')
 })
 
