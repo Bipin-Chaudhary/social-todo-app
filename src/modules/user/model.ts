@@ -11,6 +11,5 @@ const UsersSchema = new Schema(
 )
 
 UsersSchema.index({ sEmail: -1 }, { unique: true })
-UsersSchema.index({ sMobile: -1 }, { unique: true })
 
 export default model('users', UsersSchema)
