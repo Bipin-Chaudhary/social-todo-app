@@ -12,5 +12,6 @@ export default {
   editedSuccessfully: '## edited successfully!',
   fetchedSuccessfully: '## fetched successfully!',
   loginSuccess: 'You have successfully logged in!',
-  authFailed: 'Please login to continue!'
+  authFailed: 'Please login to continue!',
+  accessDenied: 'You don\'t have sufficient permissions!'
 }

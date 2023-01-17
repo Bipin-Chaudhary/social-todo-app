@@ -142,8 +142,6 @@ class UsersController {
 
   async listPublicUsers (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
-
       const { limit, skip, search } = defaultPagination(req.query)
 
       const query:Query = {}
@@ -159,6 +157,25 @@ class UsersController {
       const total = await UsersModel.countDocuments(query)
 
       return res.status(statusCode.OK).json({ message: responseMessages.fetchedSuccessfully.replace('##', 'users'), data: { docs: users, total } })
+    } catch (error) {
+      return res.status(statusCode.InternalServerError).json({
+        status: statusCode.InternalServerError,
+        message: responseMessages.InternalServerError
+      })
+    }
+  }
+
+  async editOtherUser (req:CustomRequest, res:Response) {
+    try {
+      const { id } = req.params // user id
+      const { sName } = req.body
+
+      const user = await UsersModel.findOne({ _id: id }, { _id: 1 }).lean()
+      if (!user) res.status(statusCode.NotFound).json({ message: responseMessages.notFound.replace('##', 'user') })
+
+      await UsersModel.updateOne({ _id: id }, { sName })
+
+      return res.status(statusCode.OK).json({ message: responseMessages.editedSuccessfully.replace('##', 'users') })
     } catch (error) {
       return res.status(statusCode.InternalServerError).json({
         status: statusCode.InternalServerError,

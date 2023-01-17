@@ -5,7 +5,7 @@ import bodyParser from 'body-parser'
 import MongoConnect from './config/mongodb'
 import responseMessages from './utils/responseMessages'
 import statusCode from './utils/statusCode'
-import { auth, requiresAuth, claimCheck } from 'express-openid-connect'
+import { auth, requiresAuth } from 'express-openid-connect'
 
 // routes
 import UserRoutes from './modules/user/routes'
@@ -30,19 +30,22 @@ const config = {
   secret: process.env.SECRET,
   baseURL: process.env.BASE_URL,
   clientID: process.env.CLIENT_ID,
-  issuerBaseURL: process.env.ISSUER_BASE_URL
+  issuerBaseURL: process.env.ISSUER_BASE_URL,
+  clientSecret: 'efZyrMrIgE7HhpGxH5M6cpCA5aEoRzVMqouHVBBMtEC-VDn-8wDRXuLNfljsqGx8',
+  authorizationParams: {
+    response_type: 'code id_token'
+  }
 }
 
 // auth router attaches /login, /logout, and /callback routes to the baseURL
 app.use(auth(config))
 
 app.get('/', (req, res) => {
-  res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out')
+  res.send(`welcome to social todo app -->  ${req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out'}`)
 })
 
-// app.get('/admin/community', claimCheck((req, claims) => {
-//   if (claims) return claims.isAdmin && claims.roles.includes('community')
-// }), (req, res) => {
+// app.get('/admin', permissionCheck(['edit:users']), (req, res) => {
+//   res.send('you are admin')
 // })
 
 app.get('/test', requiresAuth(), (req:Request, res:Response, next:NextFunction) => {
