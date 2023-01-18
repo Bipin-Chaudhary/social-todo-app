@@ -6,6 +6,7 @@ import MongoConnect from './config/mongodb'
 import responseMessages from './utils/responseMessages'
 import statusCode from './utils/statusCode'
 import { auth, requiresAuth } from 'express-openid-connect'
+import permissionCheck from './middleware/permissionCheck'
 
 // routes
 import UserRoutes from './modules/user/routes'
@@ -44,9 +45,9 @@ app.get('/', (req, res) => {
   res.send(`welcome to social todo app -->  ${req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out'}`)
 })
 
-// app.get('/admin', permissionCheck(['edit:users']), (req, res) => {
-//   res.send('you are admin')
-// })
+app.get('/admin', permissionCheck(['edit:users']), (req, res) => {
+  res.send('you are admin')
+})
 
 app.get('/test', requiresAuth(), (req:Request, res:Response, next:NextFunction) => {
   res.send('welcome to social todo app')
