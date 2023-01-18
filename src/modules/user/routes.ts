@@ -27,6 +27,6 @@ router.get('/profile', authCheck, UsersController.getProfileDetails)
 // public Apis
 router.get('/public/profile/:id', UsersController.getPublicProfileDetails)
 
-router.get('/public/users', UsersController.listPublicUsers)
+router.get('/list-public-users', UsersController.listPublicUsers)
 
 export default router
