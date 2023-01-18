@@ -5,6 +5,7 @@ import statusCode from '../../utils/statusCode'
 import messages from '../../utils/responseMessages'
 import { validationResult } from 'express-validator'
 import defaultPagination from '../../utils/defaultPagination'
+import recachegoose from 'recachegoose'
 
 type CustomRequest = Request & { userId?: string }
 
@@ -19,6 +20,8 @@ class PostController {
       const createObj = { iUser: req.userId, sContent, sTitle }
 
       const post = await PostModel.create(createObj)
+
+      recachegoose.clearCache('list-post', null)
 
       return res.status(statusCode.OK).json({ message: messages.addedSuccessfully.replace('##', 'post'), data: post })
     } catch (error) {
@@ -45,6 +48,8 @@ class PostController {
 
       const updatedPost = await PostModel.findByIdAndUpdate(id, updateObj, { new: true })
 
+      recachegoose.clearCache(id, null)
+
       return res.status(statusCode.OK).json({ message: messages.editedSuccessfully.replace('##', 'post'), data: updatedPost })
     } catch (error) {
       return res.status(statusCode.InternalServerError).json({
@@ -64,6 +69,8 @@ class PostController {
 
       await PostModel.deleteOne({ _id: id })
 
+      recachegoose.clearCache('list-post', null)
+
       return res.status(statusCode.OK).json({ message: messages.deletedSuccessfully.replace('##', 'post'), data: null })
     } catch (error) {
       return res.status(statusCode.InternalServerError).json({
@@ -77,7 +84,8 @@ class PostController {
     try {
       const { id } = req.params
 
-      const post = await PostModel.findOne({ _id: id, iUser: new mongoose.Types.ObjectId(req.userId) })
+      // @ts-ignore
+      const post = await PostModel.findOne({ _id: id, iUser: new mongoose.Types.ObjectId(req.userId) }).cache(process.env.CACHE_LIMIT, id)
 
       if (!post) return res.status(statusCode.NotFound).json({ message: messages.notFound.replace('##', 'post') })
 
@@ -96,7 +104,8 @@ class PostController {
 
       const query = { iUser: new mongoose.Types.ObjectId(req.userId) }
 
-      const post = await PostModel.find(query)
+      // @ts-ignore
+      const post = await PostModel.find(query).cache(process.env.CACHE_LIMIT, 'list-post')
         .skip(skip)
         .limit(limit)
         .lean()
@@ -120,7 +129,8 @@ class PostController {
 
       const query = { iUser: new mongoose.Types.ObjectId(id) }
 
-      const posts = await PostModel.find(query)
+      // @ts-ignore
+      const posts = await PostModel.find(query).cache(process.env.CACHE_LIMIT, 'list-post')
         .skip(skip)
         .limit(limit)
         .lean()

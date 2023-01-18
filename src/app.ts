@@ -5,12 +5,13 @@ import bodyParser from 'body-parser'
 import MongoConnect from './config/mongodb'
 import responseMessages from './utils/responseMessages'
 import statusCode from './utils/statusCode'
-
 // routes
 import UserRoutes from './modules/user/routes'
 import TodoRoutes from './modules/todo/routes'
 import PostRoutes from './modules/post/routes'
 import CommentRoutes from './modules/comment/routes'
+import recachegoose from 'recachegoose'
+import mongoose from 'mongoose'
 
 dotenv.config()
 
@@ -24,6 +25,14 @@ app.use(bodyParser.json())
 
 app.get('/', (req:Request, res:Response, next:NextFunction) => {
   res.send('welcome to social todo app')
+})
+
+// caching with redis
+recachegoose(mongoose, {
+  engine: 'redis',
+  port: 10060,
+  host: 'redis-10060.c245.us-east-1-3.ec2.cloud.redislabs.com',
+  password: 'fzRhniTcn4Lcmi4AaaVfSgKgcmHZogoY'
 })
 
 // APIs

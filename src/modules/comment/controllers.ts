@@ -5,6 +5,7 @@ import statusCode from '../../utils/statusCode'
 import messages from '../../utils/responseMessages'
 import { validationResult } from 'express-validator'
 import defaultPagination from '../../utils/defaultPagination'
+import recachegoose from 'recachegoose'
 
 type CustomRequest = Request & { userId?: string }
 
@@ -20,6 +21,8 @@ class PostController {
       const createObj = { iUser: req.userId, sContent, iPost: id }
 
       const comment = await CommentModel.create(createObj)
+
+      recachegoose.clearCache('list-comments', null)
 
       return res.status(statusCode.OK).json({ message: messages.addedSuccessfully.replace('##', 'comment'), data: comment })
     } catch (error) {
@@ -46,6 +49,8 @@ class PostController {
 
       const updatedComment = await CommentModel.findByIdAndUpdate(id, updateObj, { new: true })
 
+      recachegoose.clearCache('list-comments', null)
+
       return res.status(statusCode.OK).json({ message: messages.editedSuccessfully.replace('##', 'comment'), data: updatedComment })
     } catch (error) {
       return res.status(statusCode.InternalServerError).json({
@@ -65,6 +70,8 @@ class PostController {
 
       await CommentModel.deleteOne({ _id: id })
 
+      recachegoose.clearCache('list-comments', null)
+
       return res.status(statusCode.OK).json({ message: messages.deletedSuccessfully.replace('##', 'comment'), data: null })
     } catch (error) {
       return res.status(statusCode.InternalServerError).json({
@@ -82,7 +89,8 @@ class PostController {
 
       const query = { iPost: new mongoose.Types.ObjectId(id) }
 
-      const comments = await CommentModel.find(query)
+      // @ts-ignore
+      const comments = await CommentModel.find(query).cache(process.env.CACHE_LIMIT, 'list-comments')
         .skip(skip)
         .limit(limit)
         .lean()

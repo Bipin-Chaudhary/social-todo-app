@@ -6,6 +6,7 @@ import responseMessages from '../../utils/responseMessages'
 import { validationResult } from 'express-validator'
 import defaultPagination from '../../utils/defaultPagination'
 import jwt from 'jsonwebtoken'
+import recachegoose from 'recachegoose'
 
 type CustomRequest = Request & { userId?: string }
 
@@ -28,6 +29,8 @@ class UsersController {
       if (userExist) return res.status(statusCode.Conflict).json({ message: responseMessages.accountExist })
 
       const user = await UsersModel.create({ sName, sEmail, sMobile, sPassword })
+
+      recachegoose.clearCache('list-public-users', null)
 
       return res.status(statusCode.OK).json({ message: responseMessages.userRegistered, data: user })
     } catch (error) {
@@ -97,6 +100,8 @@ class UsersController {
 
       const user = await UsersModel.findByIdAndUpdate({ _id: req.userId }, { sName, sMobile }, { new: true })
 
+      recachegoose.clearCache(req.userId, null)
+
       return res.status(statusCode.OK).json({ message: responseMessages.editedSuccessfully.replace('##', 'profile'), data: user })
     } catch (error) {
       return res.status(statusCode.InternalServerError).json({
@@ -108,7 +113,8 @@ class UsersController {
 
   async getProfileDetails (req:CustomRequest, res:Response) {
     try {
-      const user = await UsersModel.findOne({ _id: req.userId }, { sName: 1, sMobile: 1, sEmail: 1 })
+      // @ts-ignore
+      const user = await UsersModel.findOne({ _id: req.userId }, { sName: 1, sMobile: 1, sEmail: 1 }).cache(process.env.CACHE_LIMIT, req.userId)
 
       if (!user) res.status(statusCode.NotFound).json({ message: responseMessages.notFound.replace('##', 'account') })
 
@@ -125,7 +131,8 @@ class UsersController {
     try {
       const { id } = req.params // user id
 
-      const user = await UsersModel.findOne({ _id: id }, { sName: 1, sEmail: 1, sPhone: 1 }).lean()
+      // @ts-ignore
+      const user = await UsersModel.findOne({ _id: id }, { sName: 1, sEmail: 1, sPhone: 1 }).cache(process.env.CACHE_LIMIT, id)
 
       if (!user) res.status(statusCode.NotFound).json({ message: responseMessages.notFound.replace('##', 'account') })
 
@@ -146,7 +153,8 @@ class UsersController {
 
       if (search) query.$or = [{ sName: search }, { sEmail: search }]
 
-      const users = await UsersModel.find(query, { sName: 1, sEmail: 1, sMobile: 1 })
+      // @ts-ignore
+      const users = await UsersModel.find(query, { sName: 1, sEmail: 1, sMobile: 1 }).cache(process.env.CACHE_LIMIT, 'list-public-users')
         .skip(skip)
         .limit(limit)
         .lean()

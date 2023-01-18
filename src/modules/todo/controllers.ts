@@ -5,6 +5,7 @@ import statusCode from '../../utils/statusCode'
 import messages from '../../utils/responseMessages'
 import { validationResult } from 'express-validator'
 import defaultPagination from '../../utils/defaultPagination'
+import recachegoose from 'recachegoose'
 
 type CustomRequest = Request & { userId?: string }
 
@@ -19,6 +20,8 @@ class TodoController {
       const createObj = { iUser: req.userId, sDesc, dDate }
 
       const todo = await TodoModel.create(createObj)
+
+      recachegoose.clearCache('list-todo', null)
 
       return res.status(statusCode.OK).json({ message: messages.addedSuccessfully.replace('##', 'todo'), data: todo })
     } catch (error) {
@@ -45,6 +48,8 @@ class TodoController {
 
       const updatedTodo = await TodoModel.findByIdAndUpdate(id, updateObj, { new: true })
 
+      recachegoose.clearCache('list-todo', null)
+
       return res.status(statusCode.OK).json({ message: messages.editedSuccessfully.replace('##', 'todo'), data: updatedTodo })
     } catch (error) {
       return res.status(statusCode.InternalServerError).json({
@@ -70,6 +75,8 @@ class TodoController {
 
       const updatedTodo = await TodoModel.findByIdAndUpdate(id, updateObj, { new: true })
 
+      recachegoose.clearCache('list-todo', null)
+
       return res.status(statusCode.OK).json({ message: messages.editedSuccessfully.replace('##', 'todo'), data: updatedTodo })
     } catch (error) {
       return res.status(statusCode.InternalServerError).json({
@@ -89,6 +96,8 @@ class TodoController {
 
       await TodoModel.deleteOne({ _id: id })
 
+      recachegoose.clearCache('list-todo', null)
+
       return res.status(statusCode.OK).json({ message: messages.deletedSuccessfully.replace('##', 'todo'), data: null })
     } catch (error) {
       return res.status(statusCode.InternalServerError).json({
@@ -102,7 +111,8 @@ class TodoController {
     try {
       const { id } = req.params
 
-      const todo = await TodoModel.findOne({ _id: id, iUser: new mongoose.Types.ObjectId(req.userId) }).lean()
+      // @ts-ignore
+      const todo = await TodoModel.findOne({ _id: id, iUser: new mongoose.Types.ObjectId(req.userId) }).cache(process.env.CACHE_LIMIT, id).lean()
 
       if (!todo) return res.status(statusCode.NotFound).json({ message: messages.notFound.replace('##', 'todo') })
 
@@ -121,7 +131,8 @@ class TodoController {
 
       const query = { iUser: new mongoose.Types.ObjectId(req.userId) }
 
-      const todos = await TodoModel.find(query)
+      // @ts-ignore
+      const todos = await TodoModel.find(query).cache(process.env.CACHE_LIMIT, 'list-todo')
         .skip(skip)
         .limit(limit)
         .lean()
@@ -145,7 +156,8 @@ class TodoController {
 
       const query = { iUser: new mongoose.Types.ObjectId(id) }
 
-      const todos = await TodoModel.find(query)
+      // @ts-ignore
+      const todos = await TodoModel.find(query).cache(process.env.CACHE_LIMIT, 'list-todo')
         .skip(skip)
         .limit(limit)
         .lean()
