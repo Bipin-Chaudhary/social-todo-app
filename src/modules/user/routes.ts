@@ -31,8 +31,6 @@ router.get('/public/profile/:id', UsersController.getPublicProfileDetails)
 
 router.get('/list-public-users', UsersController.listPublicUsers)
 
-router.get('/list-public-users', requiresAuth(), UsersController.listPublicUsers)
-
 // edit other users / admin role required with edit:users permission
 router.put('/edit-other/:id', body('sName').not().isEmpty(), permissionCheck(['edit:users']), authCheck, UsersController.editOtherUser)
 

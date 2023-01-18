@@ -41,8 +41,6 @@ type CustomRequest = Request & { userId?: string }
 
 export default async (req:CustomRequest, res:Response, next:NextFunction) => {
   try {
-    console.log('auth called')
-
     const userData = await UserModel.findOne({ sEmail: req.oidc.user.email }, { _id: 1 })
 
     if (!userData) {
