@@ -11,7 +11,6 @@ type CustomRequest = Request & { userId?: string }
 class PostController {
   async add (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
       const errors = validationResult(req)
       if (!errors.isEmpty()) return res.status(statusCode.UnprocessableEntity).json({ status: statusCode.UnprocessableEntity, errors: errors.array() })
 
@@ -32,7 +31,6 @@ class PostController {
 
   async edit (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
       const errors = validationResult(req)
       if (!errors.isEmpty()) return res.status(statusCode.UnprocessableEntity).json({ status: statusCode.UnprocessableEntity, errors: errors.array() })
 
@@ -58,8 +56,6 @@ class PostController {
 
   async delete (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
-
       const { id } = req.params
 
       const post = await PostModel.findOne({ _id: id, iUser: new mongoose.Types.ObjectId(req.userId) })
@@ -79,8 +75,6 @@ class PostController {
 
   async details (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
-
       const { id } = req.params
 
       const post = await PostModel.findOne({ _id: id, iUser: new mongoose.Types.ObjectId(req.userId) })
@@ -98,8 +92,6 @@ class PostController {
 
   async list (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
-
       const { limit, skip } = defaultPagination(req.query)
 
       const query = { iUser: new mongoose.Types.ObjectId(req.userId) }
@@ -122,8 +114,6 @@ class PostController {
 
   async listPublicPosts (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
-
       const { limit, skip } = defaultPagination(req.query)
 
       const { id } = req.params // user id

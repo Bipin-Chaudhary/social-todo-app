@@ -16,7 +16,6 @@ type Query = {
 class UsersController {
   async signup (req:Request, res:Response) {
     try {
-      console.log('called', req.body)
       const errors = validationResult(req)
       if (!errors.isEmpty()) return res.status(statusCode.UnprocessableEntity).json({ status: statusCode.UnprocessableEntity, errors: errors.array() })
 
@@ -41,7 +40,6 @@ class UsersController {
 
   async login (req:Request, res:Response) {
     try {
-      console.log('called', req.body)
       const errors = validationResult(req)
       if (!errors.isEmpty()) return res.status(statusCode.UnprocessableEntity).json({ status: statusCode.UnprocessableEntity, errors: errors.array() })
 
@@ -142,15 +140,12 @@ class UsersController {
 
   async listPublicUsers (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
-
       const { limit, skip, search } = defaultPagination(req.query)
 
       const query:Query = {}
 
       if (search) query.$or = [{ sName: search }, { sEmail: search }]
 
-      console.log(query)
       const users = await UsersModel.find(query, { sName: 1, sEmail: 1, sMobile: 1 })
         .skip(skip)
         .limit(limit)
