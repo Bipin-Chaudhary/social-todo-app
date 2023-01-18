@@ -9,10 +9,8 @@ type CustomRequest = Request & { userId?: string }
 
 export default async (req:CustomRequest, res:Response, next:NextFunction) => {
   try {
-    console.log('auth called')
     const token = req!.headers!.authorization!.split(' ')[1] || req!.headers!.authorization
 
-    console.log({ token })
     if (!token) {
       return res.status(statusCode.Unauthorized).json({
         message: responseMessages.authFailed

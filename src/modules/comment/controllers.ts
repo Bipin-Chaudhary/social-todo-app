@@ -11,7 +11,6 @@ type CustomRequest = Request & { userId?: string }
 class PostController {
   async add (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
       const errors = validationResult(req)
       if (!errors.isEmpty()) return res.status(statusCode.UnprocessableEntity).json({ status: statusCode.UnprocessableEntity, errors: errors.array() })
 
@@ -33,7 +32,6 @@ class PostController {
 
   async edit (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
       const errors = validationResult(req)
       if (!errors.isEmpty()) return res.status(statusCode.UnprocessableEntity).json({ status: statusCode.UnprocessableEntity, errors: errors.array() })
 
@@ -59,8 +57,6 @@ class PostController {
 
   async delete (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
-
       const { id } = req.params // comment id
 
       const comment = await CommentModel.findOne({ _id: id, iUser: new mongoose.Types.ObjectId(req.userId) })
@@ -81,8 +77,6 @@ class PostController {
   // public
   async listPublicPostComments (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
-
       const { id } = req.params // post id
       const { limit, skip } = defaultPagination(req.query)
 

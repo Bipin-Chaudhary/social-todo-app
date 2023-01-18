@@ -11,7 +11,6 @@ type CustomRequest = Request & { userId?: string }
 class TodoController {
   async add (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
       const errors = validationResult(req)
       if (!errors.isEmpty()) return res.status(statusCode.UnprocessableEntity).json({ status: statusCode.UnprocessableEntity, errors: errors.array() })
 
@@ -32,7 +31,6 @@ class TodoController {
 
   async edit (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
       const errors = validationResult(req)
       if (!errors.isEmpty()) return res.status(statusCode.UnprocessableEntity).json({ status: statusCode.UnprocessableEntity, errors: errors.array() })
 
@@ -58,7 +56,6 @@ class TodoController {
 
   async markComplete (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
       const errors = validationResult(req)
       if (!errors.isEmpty()) return res.status(statusCode.UnprocessableEntity).json({ status: statusCode.UnprocessableEntity, errors: errors.array() })
 
@@ -84,8 +81,6 @@ class TodoController {
 
   async delete (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
-
       const { id } = req.params
 
       const todo = await TodoModel.findOne({ _id: id, iUser: new mongoose.Types.ObjectId(req.userId) }).lean()
@@ -105,8 +100,6 @@ class TodoController {
 
   async details (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
-
       const { id } = req.params
 
       const todo = await TodoModel.findOne({ _id: id, iUser: new mongoose.Types.ObjectId(req.userId) }).lean()
@@ -124,8 +117,6 @@ class TodoController {
 
   async list (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
-
       const { limit, skip } = defaultPagination(req.query)
 
       const query = { iUser: new mongoose.Types.ObjectId(req.userId) }
@@ -148,8 +139,6 @@ class TodoController {
 
   async listPublicTodos (req:CustomRequest, res:Response) {
     try {
-      console.log('called', req.userId)
-
       const { limit, skip } = defaultPagination(req.query)
 
       const { id } = req.params // user id
